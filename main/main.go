@@ -17,9 +17,9 @@ const (
 	ApiKey              = "PKJ6ANPZLVR4F3NUS4S5"
 	DEFAULT_BASE_URL    = "https://paper-api.alpaca.markets"
 	DEFAULT_ASSET       = "DB"
-	MAX_SHARE_TO_HOLD   = 100
-	THRESHOLD_TO_FOLLOW = 5
-	DEFAULT_QUANTITY    = 1
+	MAX_SHARE_TO_HOLD   = 1000
+	THRESHOLD_TO_FOLLOW = 10
+	DEFAULT_QUANTITY    = 10
 )
 
 var logger = log.New(os.Stdout, "main", log.LstdFlags)
