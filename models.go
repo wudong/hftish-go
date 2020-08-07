@@ -44,7 +44,7 @@ func (quote *Quote) Update(qData alpaca.StreamQuote) {
 		quote.BidSize = qData.BidSize
 		quote.Ask = qData.AskPrice
 		quote.AskSize = qData.AskSize
-		logger.Printf("Init quote -- Bid: %f, Ask: %f", quote.Bid, quote.Ask)
+		logger.Printf("Init Quote -- Bid: %f, Ask: %f", quote.Bid, quote.Ask)
 		return
 	}
 
@@ -54,12 +54,12 @@ func (quote *Quote) Update(qData alpaca.StreamQuote) {
 
 	b1 := quote.Bid != qData.BidPrice
 	b2 := quote.Ask != qData.AskPrice
-	levelChange := round(qData.AskPrice-quote.Bid, 2)
+	spread := round(qData.AskPrice-qData.BidPrice, 2)
 
-	logger.Printf("checking -- Bid: %t, Ask: %t, change: %f", b1, b2, levelChange)
+	logger.Printf("checking -- Bid: %t, Ask: %t, spread: %f", b1, b2, spread)
 
 	// check if there has been a level change
-	if b1 && b2 && levelChange == 0.01 {
+	if b1 && b2 && spread == 0.01 {
 		quote.PrevBid = quote.Bid
 		quote.PrevAsk = quote.Ask
 		quote.Bid = qData.BidPrice
