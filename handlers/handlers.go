@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-var logger = log.New(os.Stdout, "htfish", log.LstdFlags)
+var logger = log.New(os.Stdout, "handlers", log.LstdFlags)
 
 func placeOrder(context *hftish.TradingContext, assetKey string, price decimal.Decimal, side alpaca.Side) (*alpaca.Order, error) {
 	order := alpaca.PlaceOrderRequest{

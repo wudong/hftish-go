@@ -22,7 +22,7 @@ const (
 	DEFAULT_QUANTITY    = 1
 )
 
-var logger = log.New(os.Stdout, "htfish", log.LstdFlags)
+var logger = log.New(os.Stdout, "main", log.LstdFlags)
 
 func init() {
 	if env := os.Getenv(common.EnvApiKeyID); env == "" {

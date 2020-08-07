@@ -2,8 +2,12 @@ package hftish
 
 import (
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
+	"log"
 	"math"
+	"os"
 )
+
+var logger = log.New(os.Stdout, "model", log.LstdFlags)
 
 type Quote struct {
 	PrevBid     float32
@@ -34,22 +38,41 @@ func (quote *Quote) Reset() {
 }
 
 func (quote *Quote) Update(qData alpaca.StreamQuote) {
+	if quote.Time == 0 {
+		quote.Time = qData.Timestamp
+		quote.Bid = qData.BidPrice
+		quote.BidSize = qData.BidSize
+		quote.Ask = qData.AskPrice
+		quote.AskSize = qData.AskSize
+		logger.Printf("Init quote -- Bid: %f, Ask: %f", quote.Bid, quote.Ask)
+		return
+	}
+
 	// update bid and ask sizes and timestamp.
 	quote.BidSize = qData.BidSize
 	quote.AskSize = qData.AskSize
 
+	b1 := quote.Bid != qData.BidPrice
+	b2 := quote.Ask != qData.AskPrice
+	levelChange := round(qData.AskPrice-quote.Bid, 2)
+
+	logger.Printf("checking -- Bid: %t, Ask: %t, change: %f", b1, b2, levelChange)
+
 	// check if there has been a level change
-	if quote.Bid != qData.BidPrice &&
-		quote.Ask != qData.AskPrice &&
-		round(qData.AskPrice-quote.Bid, 2) == 0.01 {
+	if b1 && b2 && levelChange == 0.01 {
 		quote.PrevBid = quote.Bid
 		quote.PrevAsk = quote.Ask
 		quote.Bid = qData.BidPrice
 		quote.Ask = qData.AskPrice
 		quote.Time = qData.Timestamp
 		//update spread.
-		quote.PrevSpread = round(quote.PrevAsk-quote.PrevBid, 3)
-		quote.Spread = round(quote.Ask-quote.Bid, 3)
+		s1 := round(quote.PrevAsk-quote.PrevBid, 3)
+		s2 := round(quote.Ask-quote.Bid, 3)
+
+		quote.PrevSpread = s1
+		quote.Spread = s2
+
+		logger.Printf("spread -- prev: %f, now: %f", s1, s2)
 
 		// if change is from one penny spread level to a different penny
 		// spread level, then initialize for new level
