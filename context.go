@@ -1,6 +1,8 @@
-package handlers
+package hftish
 
-import "github.com/alpacahq/alpaca-trade-api-go/alpaca"
+import (
+	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
+)
 
 type TradingContext struct {
 	Client                 *alpaca.Client

@@ -1,15 +1,16 @@
-package ""
+package handlers
 
 import (
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
 	"github.com/shopspring/decimal"
+	hftish "hftish-go"
 	"log"
 	"os"
 )
 
-var logger = log.New(os.Stdout, "htfish",  log.LstdFlags)
+var logger = log.New(os.Stdout, "htfish", log.LstdFlags)
 
-func placeOrder(context *TradingContext, assetKey string, price decimal.Decimal, side alpaca.Side) (*alpaca.Order, error) {
+func placeOrder(context *hftish.TradingContext, assetKey string, price decimal.Decimal, side alpaca.Side) (*alpaca.Order, error) {
 	order := alpaca.PlaceOrderRequest{
 		AssetKey:    &assetKey,
 		Side:        side,
@@ -44,10 +45,9 @@ func placeOrder(context *TradingContext, assetKey string, price decimal.Decimal,
 	return placeOrder, nil
 }
 
-
 // we got an update on one of the orders we submitted, we need to update
 // our Position with the new information
-func tradeUpdateHandler(context *TradingContext, msg alpaca.TradeUpdate) {
+func TradeUpdateHandler(context *hftish.TradingContext, msg alpaca.TradeUpdate) {
 	logger.Printf("%s event received for order %s.\n", msg.Event, msg.Order.ID)
 	event := msg.Event
 
@@ -58,8 +58,8 @@ func tradeUpdateHandler(context *TradingContext, msg alpaca.TradeUpdate) {
 	case event == "fill":
 		if msg.Order.Side == alpaca.Buy {
 			context.Position.UpdateTotalShares(int32(msg.Order.FilledQty.IntPart()))
-		}else {
-			context.Position.UpdateTotalShares(-1*int32(msg.Order.FilledQty.IntPart()))
+		} else {
+			context.Position.UpdateTotalShares(-1 * int32(msg.Order.FilledQty.IntPart()))
 		}
 		context.Position.RemovePendingOrder(orderId, orderSide)
 	case event == "partial_fill":
@@ -72,19 +72,19 @@ func tradeUpdateHandler(context *TradingContext, msg alpaca.TradeUpdate) {
 
 }
 
-func quoteHandler(context *TradingContext, msg alpaca.StreamQuote) {
+func QuoteHandler(context *hftish.TradingContext, msg alpaca.StreamQuote) {
 	logger.Println("Quote Received:", msg.Symbol, msg.BidPrice, msg.BidSize, msg.AskPrice, msg.AskSize)
 	context.Quote.Update(msg)
 }
 
 //
-func tradeHandler(context *TradingContext, msg alpaca.StreamTrade) {
+func TradeHandler(context *hftish.TradingContext, msg alpaca.StreamTrade) {
 	logger.Println("Trade Received:", msg.Symbol, msg.Price, msg.Size)
-	if context.Quote.Traded {                 // have we already traded on this.
+	if context.Quote.Traded { // have we already traded on this.
 		return
 	}
 
-	if msg.Timestamp <= context.Quote.Time + 50 { //the trade came too close o
+	if msg.Timestamp <= context.Quote.Time+50 { //the trade came too close o
 		return
 	}
 
@@ -96,12 +96,12 @@ func tradeHandler(context *TradingContext, msg alpaca.StreamTrade) {
 		price := decimal.NewFromFloat32(msg.Price)
 
 		if msg.Price == context.Quote.Ask && // we are buying.
-			float32(context.Quote.BidSize) > 1.8 * float32(context.Quote.AskSize) &&
-			context.Position.TotalShares + context.Position.PendingBuyShares < context.MaxShareToHold {
+			float32(context.Quote.BidSize) > 1.8*float32(context.Quote.AskSize) &&
+			context.Position.TotalShares+context.Position.PendingBuyShares < context.MaxShareToHold {
 			//submit our buy at the ask price
 
 			order, err := placeOrder(context, assetKey, price, alpaca.Buy)
-			if err!=nil {
+			if err != nil {
 				return
 			}
 
@@ -114,7 +114,7 @@ func tradeHandler(context *TradingContext, msg alpaca.StreamTrade) {
 			context.Position.TotalShares-context.Position.PendingSellShares >= context.DefaultQuantityToTrade {
 
 			order, err := placeOrder(context, assetKey, price, alpaca.Buy)
-			if err!=nil {
+			if err != nil {
 				return
 			}
 

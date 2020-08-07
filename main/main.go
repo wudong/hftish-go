@@ -1,26 +1,28 @@
- package main
+package main
 
- import (
-	 "fmt"
-	 "github.com/alpacahq/alpaca-trade-api-go/alpaca"
-	 "github.com/alpacahq/alpaca-trade-api-go/common"
-	 "github.com/alpacahq/alpaca-trade-api-go/stream"
-	 "log"
-	 "os"
-	 "flag"
- )
-
-const (
-    ApiSecret        = "3ACKbLvfY/ZgTBCwVGycr62Hc1/jJyRWj4bi/aqa"
-    ApiKey           = "PKJ6ANPZLVR4F3NUS4S5"
-    DEFAULT_BASE_URL = "https://paper-api.alpaca.markets"
-	DEFAULT_ASSET    = "DB"
-	MAX_SHARE_TO_HOLD   = 100
-	THRESHOLD_TO_FOLLOW = 5
-	DEFAULT_QUANTITY = 1
+import (
+	"flag"
+	"fmt"
+	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
+	"github.com/alpacahq/alpaca-trade-api-go/common"
+	"github.com/alpacahq/alpaca-trade-api-go/stream"
+	hftish "hftish-go"
+	"hftish-go/handlers"
+	"log"
+	"os"
 )
 
-var logger = log.New(os.Stdout, "htfish",  log.LstdFlags)
+const (
+	ApiSecret           = "3ACKbLvfY/ZgTBCwVGycr62Hc1/jJyRWj4bi/aqa"
+	ApiKey              = "PKJ6ANPZLVR4F3NUS4S5"
+	DEFAULT_BASE_URL    = "https://paper-api.alpaca.markets"
+	DEFAULT_ASSET       = "DB"
+	MAX_SHARE_TO_HOLD   = 100
+	THRESHOLD_TO_FOLLOW = 5
+	DEFAULT_QUANTITY    = 1
+)
+
+var logger = log.New(os.Stdout, "htfish", log.LstdFlags)
 
 func init() {
 	if env := os.Getenv(common.EnvApiKeyID); env == "" {
@@ -53,26 +55,26 @@ func main() {
 	}
 	logger.Println("Account: ", *acct)
 
-	context := NewTradingContext(alpacaClient, *asset, int32(*maxShare), int32(*threshold), int32(*tradeQuantity))
-	logger.Println("Context: ", context)
+	context := hftish.NewTradingContext(alpacaClient, *asset, int32(*maxShare), int32(*threshold), int32(*tradeQuantity))
+	logger.Printf("Context{asset: %s, qty: %d, max: %d, follow: %d}\n", context.AssetKey, context.DefaultQuantityToTrade, context.MaxShareToHold, context.ThresholdToFollow)
 
-	if err := stream.Register(alpaca.TradeUpdates, func(msg interface{}){
+	if err := stream.Register(alpaca.TradeUpdates, func(msg interface{}) {
 		tradeUpdateMsg := msg.(alpaca.TradeUpdate)
-		tradeUpdateHandler(context, tradeUpdateMsg)
+		handlers.TradeUpdateHandler(context, tradeUpdateMsg)
 	}); err != nil {
 		panic(err)
 	}
 
 	if err := stream.Register(qc, func(msg interface{}) {
 		quoteMsg := msg.(alpaca.StreamQuote)
-		quoteHandler(context, quoteMsg)
+		handlers.QuoteHandler(context, quoteMsg)
 	}); err != nil {
 		panic(err)
 	}
 
 	if err := stream.Register(tc, func(msg interface{}) {
 		tradeMsg := msg.(alpaca.StreamTrade)
-		tradeHandler(context, tradeMsg)
+		handlers.TradeHandler(context, tradeMsg)
 	}); err != nil {
 		panic(err)
 	}
@@ -80,4 +82,3 @@ func main() {
 	select {}
 
 }
-
