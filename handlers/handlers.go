@@ -99,7 +99,7 @@ func TradeHandler(context *hftish.TradingContext, msg alpaca.StreamTrade) {
 			float32(context.Quote.AskSize) > 1.8*float32(context.Quote.BidSize) &&
 			context.Position.TotalShares-context.Position.PendingSellShares >= context.DefaultQuantityToTrade {
 
-			order, err := placeOrder(context, assetKey, price, alpaca.Buy)
+			order, err := placeOrder(context, assetKey, price, alpaca.Sell)
 			if err != nil {
 				return
 			}
