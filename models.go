@@ -1,6 +1,7 @@
 package hftish
 
 import (
+	"fmt"
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
 	"log"
 	"math"
@@ -93,6 +94,11 @@ type Position struct {
 	PendingBuyShares  int32
 	PendingSellShares int32
 	TotalShares       int32
+}
+
+func (p *Position) ToString() string {
+	return fmt.Sprintf("Position{ TotalShare: %d, Pending Buy: %s, Pending Sell: %s, Orderfilled: %s}",
+		p.TotalShares, p.PendingBuyShares, p.PendingSellShares, p.OrderFilledAmount)
 }
 
 func (p *Position) UpdatePendingBuyShares(quantity int32) {

@@ -77,7 +77,7 @@ func TradeHandler(context *hftish.TradingContext, msg alpaca.StreamTrade) {
 		// the trade was large enough to follow. so we check to to see if we are ready to trade.
 		// we also check to see that the bid vs ask quantities (order book imbalance)
 		// indicate a moment in that direction.
-		logger.Println("Following the trade:", msg.Symbol, msg.Price)
+		logger.Printf("Following the trade [%s, %f] with OrderBook balance[%d, %d]\n", msg.Symbol, msg.Price, context.Quote.BidSize, context.Quote.AskSize)
 
 		assetKey := context.AssetKey
 		price := decimal.NewFromFloat32(msg.Price)
