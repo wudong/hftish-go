@@ -15,7 +15,7 @@ func placeOrder(context *hftish.TradingContext, assetKey string, price decimal.D
 		AssetKey:    &assetKey,
 		Side:        side,
 		Type:        alpaca.Limit,
-		TimeInForce: alpaca.Day,
+		TimeInForce: alpaca.IOC,
 		Qty:         decimal.NewFromInt(int64(context.DefaultQuantityToTrade)),
 		LimitPrice:  &price,
 	}
@@ -25,23 +25,6 @@ func placeOrder(context *hftish.TradingContext, assetKey string, price decimal.D
 		logger.Fatal("Submit order failed", err)
 		return nil, err
 	}
-
-	// approximate an IOC order by immediately cancelling
-	retry := 0
-	for {
-		var err error = context.Client.CancelOrder(placeOrder.ID)
-		if err != nil {
-			logger.Fatal("Cancel order failed", err) //retry gain
-			retry++
-		} else {
-			break
-		}
-		if retry > 10 {
-			logger.Fatal("Cancel order failed after 10 retry, please look!")
-			break
-		}
-	}
-
 	return placeOrder, nil
 }
 
