@@ -8,7 +8,7 @@ import (
 	"github.com/alpacahq/alpaca-trade-api-go/stream"
 	hftish "hftish-go"
 	"hftish-go/handlers"
-	"log"
+	"hftish-go/logging"
 	"os"
 )
 
@@ -20,9 +20,8 @@ const (
 	MAX_SHARE_TO_HOLD   = 1000
 	THRESHOLD_TO_FOLLOW = 10
 	DEFAULT_QUANTITY    = 10
+	projectID           = "YOUR_PROJECT_ID"
 )
-
-var logger = log.New(os.Stdout, "main", log.LstdFlags)
 
 func init() {
 	if env := os.Getenv(common.EnvApiKeyID); env == "" {
@@ -35,6 +34,8 @@ func init() {
 }
 
 func main() {
+	defer logging.Cleanup()
+	logger := logging.GetLogger()
 
 	asset := flag.String("asset", DEFAULT_ASSET, "Specify which asset you want to trade with.")
 	url := flag.String("url", DEFAULT_BASE_URL, "Specify the API URL.")

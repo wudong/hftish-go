@@ -3,12 +3,16 @@ package hftish
 import (
 	"fmt"
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
+	"hftish-go/logging"
 	"log"
 	"math"
-	"os"
 )
 
-var logger = log.New(os.Stdout, "model", log.LstdFlags)
+var logger *log.Logger
+
+func init() {
+	logger = logging.GetLogger()
+}
 
 type Quote struct {
 	PrevBid     float32

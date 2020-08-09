@@ -4,11 +4,15 @@ import (
 	"github.com/alpacahq/alpaca-trade-api-go/alpaca"
 	"github.com/shopspring/decimal"
 	hftish "hftish-go"
+	"hftish-go/logging"
 	"log"
-	"os"
 )
 
-var logger = log.New(os.Stdout, "handlers", log.LstdFlags)
+var logger *log.Logger
+
+func init() {
+	logger = logging.GetLogger()
+}
 
 func placeOrder(context *hftish.TradingContext, assetKey string, price decimal.Decimal, side alpaca.Side) (*alpaca.Order, error) {
 	order := alpaca.PlaceOrderRequest{
